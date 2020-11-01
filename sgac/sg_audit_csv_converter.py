@@ -13,7 +13,7 @@ import csv
 import argparse
 from pathlib import Path
 
-def process_one_audit_log_line(line):
+def process_one_audit_log_line(line,row_number):
 
     myLine = dict()
     new_line = re.sub(r'\([a-zA-Z0-9_]*\)', '', line)
@@ -64,7 +64,8 @@ with open(args.destination_file, 'w') as csv_file:
 
     with open(args.source_file, "r") as f:
         for l in f:
-            myRow = process_one_audit_log_line(l)
+            myRow = process_one_audit_log_line(l, row_number)
             row_number = row_number + 1
             writer.writerow(myRow)
 
+print("Rows processed:", row_number)
