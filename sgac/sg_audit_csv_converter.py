@@ -3,7 +3,7 @@
 #################################################################################
 #  [SGAC(CSV)] - Python and R scripts for NetApp StorageGRID Audit Log Analysis #
 #  License: The MIT License                                                     #
-#  Date: 2020/11/01                                                             #
+#  Date: 2020/11/02                                                             #
 #  Authors: Vishnu Vardhan, scaleoutSean                                        #
 #  URL: https://github.com/scaleoutsean/storagegrid-audit-analysis              #
 #################################################################################
@@ -13,7 +13,7 @@ import csv
 import argparse
 from pathlib import Path
 
-def process_one_audit_log_line(line,row_number):
+def process_line(line,row_number,showback):
 
     myLine = dict()
     new_line = re.sub(r'\([a-zA-Z0-9_]*\)', '', line)
@@ -31,12 +31,18 @@ def process_one_audit_log_line(line,row_number):
             key = o.group(1)
             val = o.group(2)
             if (val != None):
-                myLine[key] = val
+                if (showback == True and (key not in showback_includes)):
+                    continue
+                else:
+                    myLine[key] = val
             else:
-                debug_file.write(row_number)
+                debug_file.write("Missing value in source file, row:", row_number)
         else:
-            debug_file.write(row_number, ",", keyval)
-    return myLine
+            debug_file.write("Did not extract key in source file, row: ", row_number)
+    if ((showback == True) and (myLine['ATYP'] not in showback_items)):
+        return None
+    else:
+        return myLine
 
 #### Main Starts Here
 
@@ -44,19 +50,31 @@ parser = argparse.ArgumentParser(description='Convert NetApp StorageGRID audit l
 parser.add_argument("source_file", help="Audit log file to convert to csv", type = str)
 parser.add_argument("destination_file", help="The CSV file to generate", type = str)
 parser.add_argument("debug_file", help="The debug file to log rows that cannot be parsed", type = str)
+parser.add_argument("--data", help="Optional switch to only capture S3- and ILM-related events. One of: all, showback. Default: all.", type = str, default=all)
 
 args = parser.parse_args()
 
 row_number = 0
+showback = False
 
 fieldnames = ['Timestamp', 'AMID', 'ANID', 'ASES', 'ASQN', 'ATID', 'ATIM', 'ATYP', 'AVER', 'CBID', 'CNDR', 'CNID', 'CSIZ', 'CTAS', 'CTDR', 'CTDS', 'CTES', 'CTSR', 'CTSS', 'DAIP', 'GNDV', 'GNGP', 'GNIA', 'GNID', 'GNTP', 'HSID', 'HTRH', 'INIE', 'LOCS', 'MDIP', 'MDNA', 'MPAT', 'MPQP', 'MRBD', 'MRMD', 'MRSC', 'MRSP', 'MSIP', 'MUUN', 'OBCL', 'OCBD', 'OUID', 'PATH', 'RSLT', 'RUID', 'RULE', 'S3AI', 'S3AK', 'S3BK', 'S3KY', 'SACC', 'SAIP', 'SBAC', 'SBAI', 'SEGC', 'SEID', 'SGCB', 'SPAR', 'SRCF', 'STAT', 'SUSR', 'SVIP', 'TIME', 'TLIP', 'ULID', 'UUID']
 
 if Path(args.destination_file).is_file():
-    print("Error: destination file exists. We will not overwrite");
+    print("Error: destination file exists. We will not overwrite")
     exit(1)
 
+if (args.data == 'showback'):
+    showback = True
+    showback_items = ['ORLM', 'SDEL', 'SGET', 'SHEA', 'SPUT']
+    showback_includes = ['Timestamp', 'AMID', 'ATYP', 'CNID', 'CSIZ', 'PATH', 'RSLT', 'RULE', 'SACC', 'SAIP', 'SBAC', 'SBAI', 'STAT', 'SUSR', 'TIME', 'TLIP']
+    print("Showback is ON. Extracting only the rows with ATYP events:", showback_items)
+    print("The following subset of columns will be included:", showback_includes )
+
 with open(args.destination_file, 'w') as csv_file:
-    writer = csv.DictWriter(csv_file, fieldnames = fieldnames)
+    if (showback == True):
+        writer = csv.DictWriter(csv_file, fieldnames = showback_includes)
+    else: 
+        writer = csv.DictWriter(csv_file, fieldnames = fieldnames)
     writer.writeheader()
 
     with open(args.debug_file, 'w') as debug_file:
@@ -64,8 +82,9 @@ with open(args.destination_file, 'w') as csv_file:
 
     with open(args.source_file, "r") as f:
         for l in f:
-            myRow = process_one_audit_log_line(l, row_number)
             row_number = row_number + 1
-            writer.writerow(myRow)
+            myRow = process_line(l, row_number, showback)
+            if myRow != None:
+                writer.writerow(myRow)
 
-print("Rows processed:", row_number)
+print("Parsed lines in audit log file", args.source_file, "file:", row_number)
