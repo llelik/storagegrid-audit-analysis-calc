@@ -218,6 +218,8 @@ Generates a performance report (PDF) from a StorageGRID Audit Log file (Python a
 
 Find it in the sgac directory of this repository. A subdirectory called data has a sample audit log with which the scripts used to work prior to Nov 2020 update.
 
+![SGAC-Animation](sgac/animated_demo.gif)
+
 #### How to run
 
 1. Get into the Admin Nodes (each one, if you want to not miss things) and enable NFS or SMB read-only shares of audit logs (see the StorageGRID documentation
