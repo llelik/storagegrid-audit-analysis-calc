@@ -14,6 +14,7 @@
       - [What if I'm just interested in S3 PUT/GET/DELETE to figure out who's using how much](#what-if-im-just-interested-in-s3-putgetdelete-to-figure-out-whos-using-how-much)
       - [What else related to consumption and utilization can I find in StorageGRID audit log](#what-else-related-to-consumption-and-utilization-can-i-find-in-storagegrid-audit-log)
       - [Is there a list of all fields/keys for StorageGRID logs](#is-there-a-list-of-all-fieldskeys-for-storagegrid-logs)
+      - [How can one ensure that no audit log file is deleted before it's copied](#how-can-one-ensure-that-no-audit-log-file-is-deleted-before-its-copied)
   - [Scripts and utilities in this repo](#scripts-and-utilities-in-this-repo)
     - [[SGAC(CSV)] - StorageGRID Audit Log CSV Converter](#sgaccsv---storagegrid-audit-log-csv-converter)
       - [How to run](#how-to-run)
@@ -199,9 +200,15 @@ A lot of them (maybe not all?) are mentioned in the official documentation.
 
 All keys found testing with a sample log from v11.4 are in the Python script. If your log contains any field that's not accounted for, you'll see them called out in console output.
 
+#### How can one ensure that no audit log file is deleted before it's copied
+
+- Admin Node requires [200 GB space for audit logs](http://docs.netapp.com/sgws-114/topic/com.netapp.doc.sg-install-vmw/GUID-D1F77A07-11E1-4FB7-B958-B330A1C9E035.html?resultof=%22%61%75%64%69%74%2e%6c%6f%67%22%20)
+- Every day logs are [rotated and compressed](http://docs.netapp.com/sgws-114/topic/com.netapp.doc.sg-audit/GUID-33B77138-D408-4D4F-9994-D2E8C3101FF2.html?resultof=%22%61%75%64%69%74%2e%6c%6f%67%22%20%22%72%6f%74%61%74%65%22%20%22%72%6f%74%61%74%22%20), so assuming 20 GB of log files per day, there's at least 24 hours to get the compressed log file out before it's deleted. The NetApp Support site has a KB about expanding the space for logs.
+- You could use NetApp XCP to copy files to another share or CloudSync to copy them from NFS/SMB to S3
+
 ## Scripts and utilities in this repo
 
-So far there's only one, [SGAC(CSV)].
+So far there's only one, `[SGAC(CSV)]`.
 
 ### [SGAC(CSV)] - StorageGRID Audit Log CSV Converter
 
