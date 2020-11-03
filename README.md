@@ -14,13 +14,14 @@
       - [What if I'm just interested in S3 PUT/GET/DELETE to figure out who's using how much](#what-if-im-just-interested-in-s3-putgetdelete-to-figure-out-whos-using-how-much)
       - [What else related to consumption and utilization can I find in StorageGRID audit log](#what-else-related-to-consumption-and-utilization-can-i-find-in-storagegrid-audit-log)
       - [Is there a list of all fields/keys for StorageGRID logs](#is-there-a-list-of-all-fieldskeys-for-storagegrid-logs)
-      - [How can one ensure that no audit log file is deleted before it's copied](#how-can-one-ensure-that-no-audit-log-file-is-deleted-before-its-copied)
+      - [How can one ensure that no audit log file is deleted before it's copied out of Admin Node](#how-can-one-ensure-that-no-audit-log-file-is-deleted-before-its-copied-out-of-admin-node)
   - [Scripts and utilities in this repo](#scripts-and-utilities-in-this-repo)
     - [[SGAC(CSV)] - StorageGRID Audit Log CSV Converter](#sgaccsv---storagegrid-audit-log-csv-converter)
       - [How to run](#how-to-run)
-        - [Complete Audit Log File](#complete-audit-log-file)
-        - [Partial Audit Log File](#partial-audit-log-file)
+        - [Complete Audit Log File (Full Mode)](#complete-audit-log-file-full-mode)
+        - [Partial Audit Log File (Showback Mode)](#partial-audit-log-file-showback-mode)
       - [Sample [SGAC(CSV]) Output](#sample-sgaccsv-output)
+      - [Next Steps with [SGAC(CSV)] output](#next-steps-with-sgaccsv-output)
       - [Known issues and limitations](#known-issues-and-limitations)
       - [Performance](#performance)
       - [Change Log](#change-log)
@@ -218,7 +219,7 @@ Generates a performance report (PDF, using R) from a StorageGRID Audit Log file 
 
 Find it in the sgac directory of this repository. A subdirectory called data has a sample audit log with which the scripts used to work prior to Nov 2020 update.
 
-![SGAC-Animation](sgac/animated_demo.gif)
+![SGAC-Run-Animation](sgac/images/sgac_animated_demo.gif)
 
 #### How to run
 
@@ -228,11 +229,13 @@ Find it in the sgac directory of this repository. A subdirectory called data has
 4. Run the Python script to convert the uncompressed log file(s) to a CSV file(s)
 5. Optionally, run the R script to generate a PDF report (if you don't need this report and want to use the CSV file(s) for something else)
 
+Syntax:
+
 `sg_audit_csv_converter.py srcFile dstFile debugFile`
 
-`--data all` is the default and can be omitted.
+`--data all` is the default (assumed) and can be omitted.
 
-##### Complete Audit Log File
+##### Complete Audit Log File (Full Mode)
 
 - Only this option is meant to be used with the R script
 
@@ -240,16 +243,16 @@ Find it in the sgac directory of this repository. A subdirectory called data has
 python3 ./sg_audit_csv_converter.py audit.log out-file.csv debug.txt
 ```
 
-##### Partial Audit Log File
+##### Partial Audit Log File (Showback Mode)
 
 - Does not have data required for the R script
 - If you want one of the following, this mode is for you:
   - Cut down on the file size and processing requirements (resources, time, disk space)
   - Somewhat (but not completely) limit the amount of possibly private or confidential data included in these reports (feel free to hack away)
-  - Want to create simple show-back or charge-bacck reports
+  - Want to create simple show-back or charge-back reports
 - Add `--data showback` to only include `ATYP` events `ORLM`, `SDEL`, `SGET`, `SHEA`, `SPUT`
-- In the showback mode only `Timestamp`, `AMID`, `ATYP`, `CNID`, `CSIZ`, `PATH`, `RSLT`, `RULE`, `SACC`, `SAIP`, `SBAC`, `SBAI`, `STAT`, `SUSR`, `TIME`, `TLIP` will be included. Notice how S3KY and S3BK (see the S3 PUT example above) are not included. That is on purpose (security and privacy) but obviously can be changed
-- Obviously, only you know what fields are relevant and how much information should be added or removed to these reports
+- In showback mode only `Timestamp`, `AMID`, `ATYP`, `CNID`, `CSIZ`, `PATH`, `RSLT`, `RULE`, `SACC`, `SAIP`, `SBAC`, `SBAI`, `STAT`, `SUSR`, `TIME`, `TLIP` will be included. Notice how S3KY and S3BK (see the S3 PUT example above) are not included. That is on purpose (security and privacy) but obviously can be changed. `PATH` still contains some info that should probably be omitted when it's unnecessary for analytics purposes
+- Only you know what fields are relevant and how much information should be added or removed to these reports
 
 Run sg_audit_csv_converter.py from the data subdirectory against a decompressed audit log file in /sglogs. Save CSV output to sean-out.txt, debug info in debug.txt, and include a subset of rows and columns with `--data showback`:
 
@@ -267,20 +270,40 @@ Comparison in source and destination file sizes (MB):
 |  :---:    |  :---:      |      :---:      |
 |   18      |   11        |       5.2       |
 
+#### Next Steps with [SGAC(CSV)] output
+
+Slice it and dice that CSV file any way you see fit. Several simple examples:
+
+- Plot cumulative egress from SGET (x axis is seconds, i.e. period of observation was short). This is for the all tenants but could by by tenant, by bucket, etc. The vertical line is a S3 PUT workload used to generate audit log data I needed for this project. Of course static, basic plots don't look very nice compared to Grafana but if you don't want those users access Grafana you can create PDF reports with tables and charts and email them to Tenants every now and then.
+
+![SGAC-Egress-Plot](sgac/images/sgac_plot_cumulative_sget_egress_in_bytes.png)
+
+- Import to a SQL DB and create reports. Example below shows combined SGET egress by tenant (STAT column). Notice how the sum, around 1.4 GB (in bytes), equals cumulative egress from the chart above
+
+![SGAC-SGET-Egress-Cumulative-Sum-by-Tenant](sgac/images/sgac_sql_01.png)
+
+- By tenant and their IP, for tenant's internal reference
+
+![SGAC-SGET-Egress-Cumulative-Sum-by-Tenant](sgac/images/sgac_sql_02.png)
+
+- By tenant accessing from non-local IPv4 addresses (the SG network is `10.128.0.0/16`), to calculate WAN egress from SGET traffic (as you can see the `"`s should be removed from the values in STAT and SBAC columns for easier SQL querying)
+
+![SGAC-SGET-Egress-Cumulative-Sum-by-Tenant](sgac/images/sgac_sql_03.png)
+
 #### Known issues and limitations
 
 - Pyton converter script:
   - **IMPORTANT**: the script does not capture all audit messages
-    - `MRSP` is one such entry. It contains a non-trivial JSON file which the script currently partially drops. You can easily find such rows with `cat audit.log | grep MRSP` and process them manually. Or better yet, fix the code and submit a pull request
-  - While the Python script can output some debug info, it's not meant for reg-exp debugging - it's meant to catch failed KV pairs and usually tends to be empty (tested with an audit log from v11.4) because we drop `MRSP` (see above) key-value pairs before that
+    - `MRSP` is one such entry. It contains a non-trivial JSON file which the script currently partially drops. You can easily find such rows with `cat audit.log | grep MRSP` and process them manually. Or better yet, fix the code and submit a pull request. It does not seem that partial or missing MRSP fields could impact showback analytics, but they could impact compliance analytics
+  - While the Python script can output some debug info, it's not meant for reg-exp debugging - it's meant to catch failed KV pairs and usually tends to be empty (tested with an audit log from v11.4) because we drop `MRSP` (see above) values we cannot parse before that happens
     - How to check: compare the number of lines in audit.log with your output file. If output file has 10 lines less, that likely means 10 lines were dropped (e.g. maybe they contained `MRSP`)
   - Not all fileds have "logical" values. Audit log may contain  `SGET` rows but with no `CSIZ` value, for example. [SGAC(CSV)] doesn't attempt to do anything about that
 
 - R script:
-  - Has not been tested. If it doesn't work you can try an earlier version with input CSV generated by an older version of the Python script
+  - Could work only with CSV generated in full mode, but has not been tested with updated Python script. If it doesn't work you can try an earlier version with input CSV generated by an older version of the Python script
   - May not cover all S3 messages (such as multi-part uploads, for example)
 
-If you discover new keys (which will be obvious when running the script) that are not supported or messages that cannot be parsed please submit a pull request.
+If you discover new keys (which is obvious from warnings or errors generated by the Python script) that are not supported or messages that cannot be parsed please submit a pull request.
 
 #### Performance
 
@@ -293,6 +316,10 @@ If you discover new keys (which will be obvious when running the script) that ar
 |   2s      |   0.7s    |  0.2s     |
 
 #### Change Log
+
+- 2020/11/03
+  - Add SQL queries to illustrate reports that can be obtained from `showback`-mode CSV
+  - Clarify more precisely about MRSP parsing
 
 - 2020/11/02
   - Add `--data showback` option to extract to CSV a smaller subset of data and only rows related to main S3 and ILM operations
