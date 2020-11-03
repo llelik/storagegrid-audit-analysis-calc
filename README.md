@@ -214,7 +214,7 @@ So far there's only one, `[SGAC(CSV)]`.
 
 ### [SGAC(CSV)] - StorageGRID Audit Log CSV Converter
 
-Generates a performance report (PDF) from a StorageGRID Audit Log file (Python and R).
+Generates a performance report (PDF, using R) from a StorageGRID Audit Log file converted into the CSV format (Python).
 
 Find it in the sgac directory of this repository. A subdirectory called data has a sample audit log with which the scripts used to work prior to Nov 2020 update.
 
@@ -245,11 +245,11 @@ python3 ./sg_audit_csv_converter.py audit.log out-file.csv debug.txt
 - Does not have data required for the R script
 - If you want one of the following, this mode is for you:
   - Cut down on the file size and processing requirements (resources, time, disk space)
-  - Somewhat (but not completely) limit the amount of possibly private or confidential data included in these reports (feel free to change)
+  - Somewhat (but not completely) limit the amount of possibly private or confidential data included in these reports (feel free to hack away)
   - Want to create simple show-back or charge-bacck reports
 - Add `--data showback` to only include `ATYP` events `ORLM`, `SDEL`, `SGET`, `SHEA`, `SPUT`
-- In the showback mode only `Timestamp`, `AMID`, `ATYP`, `CNID`, `CSIZ`, `PATH`, `RSLT`, `RULE`, `SACC`, `SAIP`, `SBAC`, `SBAI`, `STAT`, `SUSR`, `TIME`, `TLIP` will be included
-- Obviously, only you know what fields are relevant and how much information should be added or removed
+- In the showback mode only `Timestamp`, `AMID`, `ATYP`, `CNID`, `CSIZ`, `PATH`, `RSLT`, `RULE`, `SACC`, `SAIP`, `SBAC`, `SBAI`, `STAT`, `SUSR`, `TIME`, `TLIP` will be included. Notice how S3KY and S3BK (see the S3 PUT example above) are not included. That is on purpose (security and privacy) but obviously can be changed
+- Obviously, only you know what fields are relevant and how much information should be added or removed to these reports
 
 Run sg_audit_csv_converter.py from the data subdirectory against a decompressed audit log file in /sglogs. Save CSV output to sean-out.txt, debug info in debug.txt, and include a subset of rows and columns with `--data showback`:
 
@@ -288,9 +288,9 @@ If you discover new keys (which will be obvious when running the script) that ar
 - Based on a casual test with a 20 MB (decompressed size) log file, the Python script running on a notebook can process the log at 10 MB/s (35 GB/day). This can be paralellized by splitting decompressed files or running several scripts against different time segments in the same file
 - Performance comparison among these three tools is meaningless (they do different things) but since you must know, here's how they compare running against a 18 MB audit.log file:
 
-| SGAC(CSV) | audit-explain  | audit-sum |
-|  :---:  |  :---:    |  :---:    |
-|   2s    |   0.7s    |  0.2s     |
+| [SGAC(CSV)] | audit-explain  | audit-sum |
+|  :---:    |  :---:    |  :---:    |
+|   2s      |   0.7s    |  0.2s     |
 
 #### Change Log
 
