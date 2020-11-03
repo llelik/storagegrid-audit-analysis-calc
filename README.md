@@ -202,7 +202,7 @@ A lot of them (maybe not all?) are mentioned in the official documentation.
 
 All keys found testing with a sample log from v11.4 are in the Python script. If your log contains any field that's not accounted for, you'll see them called out in console output.
 
-#### How can one ensure that no audit log file is deleted before it's copied
+#### How can one ensure that no audit log file is deleted before it's copied out of Admin Node
 
 - Admin Node requires [200 GB space for audit logs](http://docs.netapp.com/sgws-114/topic/com.netapp.doc.sg-install-vmw/GUID-D1F77A07-11E1-4FB7-B958-B330A1C9E035.html?resultof=%22%61%75%64%69%74%2e%6c%6f%67%22%20)
 - Every day logs are [rotated and compressed](http://docs.netapp.com/sgws-114/topic/com.netapp.doc.sg-audit/GUID-33B77138-D408-4D4F-9994-D2E8C3101FF2.html?resultof=%22%61%75%64%69%74%2e%6c%6f%67%22%20%22%72%6f%74%61%74%65%22%20%22%72%6f%74%61%74%22%20), so assuming 20 GB of log files per day, there's at least 24 hours to get the compressed log file out before it's deleted. The NetApp Support site has a KB about expanding the space for logs.
@@ -234,12 +234,15 @@ Find it in the sgac directory of this repository. A subdirectory called data has
 
 ##### Complete Audit Log File
 
+- Only this option is meant to be used with the R script
+
 ```shell
 python3 ./sg_audit_csv_converter.py audit.log out-file.csv debug.txt
 ```
 
 ##### Partial Audit Log File
 
+- Does not have data required for the R script
 - If you want one of the following, this mode is for you:
   - Cut down on the file size and processing requirements (resources, time, disk space)
   - Somewhat (but not completely) limit the amount of possibly private or confidential data included in these reports (feel free to change)
