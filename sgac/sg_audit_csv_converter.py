@@ -3,7 +3,7 @@
 #################################################################################
 #  [SGAC(CSV)] - Python and R scripts for NetApp StorageGRID Audit Log Analysis #
 #  License: The MIT License                                                     #
-#  Date: 2020/11/02                                                             #
+#  Date: 2021/06/23                                                             #
 #  Authors: Vishnu Vardhan, scaleoutSean                                        #
 #  URL: https://github.com/scaleoutsean/storagegrid-audit-analysis              #
 #################################################################################
@@ -57,18 +57,25 @@ args = parser.parse_args()
 row_number = 0
 showback = False
 
-fieldnames = ['Timestamp', 'AMID', 'ANID', 'ASES', 'ASQN', 'ATID', 'ATIM', 'ATYP', 'AVER', 'CBID', 'CNDR', 'CNID', 'CSIZ', 'CTAS', 'CTDR', 'CTDS', 'CTES', 'CTSR', 'CTSS', 'DAIP', 'GNDV', 'GNGP', 'GNIA', 'GNID', 'GNTP', 'HSID', 'HTRH', 'INIE', 'LOCS', 'MDIP', 'MDNA', 'MPAT', 'MPQP', 'MRBD', 'MRMD', 'MRSC', 'MRSP', 'MSIP', 'MUUN', 'OBCL', 'OCBD', 'OUID', 'PATH', 'RSLT', 'RUID', 'RULE', 'S3AI', 'S3AK', 'S3BK', 'S3KY', 'SACC', 'SAIP', 'SBAC', 'SBAI', 'SEGC', 'SEID', 'SGCB', 'SPAR', 'SRCF', 'STAT', 'SUSR', 'SVIP', 'TIME', 'TLIP', 'ULID', 'UUID']
+fieldnames = ['Timestamp', 'AMID', 'ANID', 'ASES', 'ASQN', 'ATID', 'ATIM', 'ATYP', 'AVER', 'CBID', 'CNDR', 'CNID', 'CSIZ', 'CTAS', 'CTDR', 'CTDS', 'CTES', 'CTSR', 'CTSS', 'DAIP', 'GNDV', 'GNGP', 'GNIA', 'GNID', 'GNTP', 'HSID', 'HTRH', 'INIE', 'LOCS', 'MDIP', 'MDNA', 'MPAT', 'MPQP', 'MRBD', 'MRMD', 'MRSC', 'MRSP', 'MSIP', 'MTME', 'MUUN', 'OBCL', 'OCBD', 'OUID', 'PATH', 'RSLT', 'RUID', 'RULE', 'S3AI', 'S3AK', 'S3BK', 'S3KY', 'SACC', 'SAIP', 'SBAC', 'SBAI', 'SEGC', 'SEID', 'SGCB', 'SPAR', 'SRCF', 'STAT', 'SUSR', 'SVIP', 'TIME', 'TLIP', 'ULID', 'UUID']
 
 if Path(args.destination_file).is_file():
-    print("Error: destination file exists. We will not overwrite")
+    print("Error: destination file exists. We will not overwrite existing output or debug file.")
     exit(1)
 
 if (args.data == 'showback'):
     showback = True
     showback_items = ['ORLM', 'SDEL', 'SGET', 'SHEA', 'SPUT']
     showback_includes = ['Timestamp', 'AMID', 'ATYP', 'CNID', 'CSIZ', 'PATH', 'RSLT', 'RULE', 'SACC', 'SAIP', 'SBAC', 'SBAI', 'STAT', 'SUSR', 'TIME', 'TLIP']
-    print("Showback is ON. Extracting only the rows with ATYP events:", showback_items)
+    print("Showback filter is ON. Extracting only the rows with ATYP events:", showback_items)
     print("The following subset of columns will be included:", showback_includes )
+
+# if (args.data == 'mgmt'):
+    #showback = True
+    # showback_items = ['MDIP', 'MDNA', 'MPAT', 'MPQP', 'MRBD', 'MRMD', 'MRSC', 'MRSP', 'MSIP', 'MUUN', 'RSLT']
+    # TODO showback_includes = ['Timestamp', 'AMID', 'ATYP', 'CNID', 'CSIZ', 'PATH', 'RSLT', 'RULE', 'SACC', 'SAIP', 'SBAC', 'SBAI', 'STAT', 'SUSR', 'TIME', 'TLIP']
+    # print("Management Audit filter is ON. Extracting only the rows with MGAU events:", showback_items)
+    # print("The following subset of columns will be included:", showback_includes )
 
 with open(args.destination_file, 'w') as csv_file:
     if (showback == True):

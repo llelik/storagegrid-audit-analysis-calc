@@ -13,9 +13,10 @@
       - [How to read audit messages](#how-to-read-audit-messages)
       - [What if I'm just interested in S3 PUT/GET/DELETE to figure out who's using how much](#what-if-im-just-interested-in-s3-putgetdelete-to-figure-out-whos-using-how-much)
       - [What else related to consumption and utilization can I find in StorageGRID audit log](#what-else-related-to-consumption-and-utilization-can-i-find-in-storagegrid-audit-log)
+      - [What is tricky about analyzing ILM, and bucket or group access policies](#what-is-tricky-about-analyzing-ilm-and-bucket-or-group-access-policies)
       - [Is there a list of all fields/keys for StorageGRID logs](#is-there-a-list-of-all-fieldskeys-for-storagegrid-logs)
       - [How can one ensure that no audit log file is deleted before it's copied out of Admin Node](#how-can-one-ensure-that-no-audit-log-file-is-deleted-before-its-copied-out-of-admin-node)
-  - [Scripts and utilities in this repo](#scripts-and-utilities-in-this-repo)
+  - [Scripts and utilities in this repository](#scripts-and-utilities-in-this-repository)
     - [[SGAC(CSV)] - StorageGRID Audit Log CSV Converter](#sgaccsv---storagegrid-audit-log-csv-converter)
       - [How to run](#how-to-run)
         - [Complete Audit Log File (Full Mode)](#complete-audit-log-file-full-mode)
@@ -139,13 +140,13 @@ What's in it? With parameter type indicators removed:
 - `[ATYP:SPUT]` - S3 PUT audit event type
 - `[CSIZ:320000000]` - Content Size (bytes)
 
-Links in here are links to the official StorageGRID documentation pages (v11.4 at the moment, althought the format of audit log isn't expected to change) to avoid repeating that info.
+Links in here are links to the official StorageGRID documentation pages (v11.4 at the moment, although the format of audit log isn't expected to change) to avoid repeating that info.
 
 ### Q&A about StorageGRID Audit Files
 
 #### How to read audit messages
 
-[Start with TFM](http://docs.netapp.com/sgws-114/topic/com.netapp.doc.sg-audit/GUID-1FD2FE07-A18F-44FA-A3B3-C7860E739A72.html?resultof=%22%53%55%43%53%22%20%22%73%75%63%22%20%22%41%55%44%54%22%20%22%61%75%64%74%22%20)
+[Start with TFM](https://docs.netapp.com/sgws-115/index.jsp?topic=%2Fcom.netapp.doc.sg-audit%2FGUID-1FD2FE07-A18F-44FA-A3B3-C7860E739A72.html&resultof=%22SUCS%22%20%22suc%22%20%22AUDT%22%20%22audt%22%20) for your version (the link is for 11.5)
 
 #### What if I'm just interested in S3 PUT/GET/DELETE to figure out who's using how much
 
@@ -197,11 +198,29 @@ Because ILM rules may apply different number of copies (or indeed, Erasure Codin
 
 StorageGRID also has advanced auditing (Configuration > Audit) and protocol headers can be captured if need be (`HTRH` in audit log.)
 
+#### What is tricky about analyzing ILM, and bucket or group access policies
+
+Those are tricky in the sense that JSON is weirdly encoded, so it's not trivial to put it back together and present as JSON. Check the documentation on those and give it a try. Here are some examples and tips:
+
+- [SBAC(CSTR):"solidfire"][S3BK(CSTR):"local"][S3SR(CSTR):"policy"][SRCF(CSTR):"<messy JSON>"]: the value of SRCF has the new ILM rule for the account "solidfire" and bucket "local"
+- [MUUN(CSTR):"urn:sgws:identity::19663253853227287812:root"][MRSC(UI32):201][RSLT(FC32):SUCS][MRSP(CSTR):"<messy JSON>"]: the root user uploaded a new bucket policy, got the response 201 (result: success), and the response was the JSON string in MRSP
+- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-policies"][MRSP(CSTR):"<messy JSON>"] - ILM policy posted
+- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-rules"][MRSP(CSTR):"<messy JSON>"] - ILM rule applied
+- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-evaluate"][MRSP(CSTR):"<messy JSON>"] - ILM rule evaluated
+- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-rules/filters-validation"] - ILM filter validated; no JSON in this message
+- IDEL - ILM-initiated deletion of an object
+- ORLM - logged when an object is copied and stored (not deleted) thanks to ILM rules
+- MGAU - management audit message (requests to the StorageGRID Management API) for every request that's not a GET or HEAD.
+
+Management audit messages are numerous. This page in the StorageGRID manual](https://docs.netapp.com/sgws-115/topic/com.netapp.doc.sg-audit/GUID-21B7D957-959B-49EB-91A6-929985DBF581.html) contains a list of all management actions and codes.
+
+To get examples of JSON output you may see encoded, refer to [Bucket and group access policies](https://docs.netapp.com/sgws-115/topic/com.netapp.doc.sg-s3/GUID-53596498-9334-44DB-A4CE-DFEC28CF21FF.html).
+
 #### Is there a list of all fields/keys for StorageGRID logs
 
-A lot of them (maybe not all?) are mentioned in the official documentation.
+A lot of them (maybe not all?) are mentioned in the official documentation. I'm not aware of any omissions.
 
-All keys found testing with a sample log from v11.4 are in the Python script. If your log contains any field that's not accounted for, you'll see them called out in console output.
+All keys found testing with a sample log from v11.5 are in the Python script. If your log contains any field that's not accounted for, you'll see them called out in console output.
 
 #### How can one ensure that no audit log file is deleted before it's copied out of Admin Node
 
@@ -209,7 +228,7 @@ All keys found testing with a sample log from v11.4 are in the Python script. If
 - Every day logs are [rotated and compressed](http://docs.netapp.com/sgws-114/topic/com.netapp.doc.sg-audit/GUID-33B77138-D408-4D4F-9994-D2E8C3101FF2.html?resultof=%22%61%75%64%69%74%2e%6c%6f%67%22%20%22%72%6f%74%61%74%65%22%20%22%72%6f%74%61%74%22%20), so assuming 20 GB of log files per day, there's at least 24 hours to get the compressed log file out before it's deleted. The NetApp Support site has a KB about expanding the space for logs.
 - You could use NetApp XCP to copy files to another share or CloudSync to copy them from NFS/SMB to S3
 
-## Scripts and utilities in this repo
+## Scripts and utilities in this repository
 
 So far there's only one, `[SGAC(CSV)]`.
 
@@ -223,7 +242,7 @@ Find it in the sgac directory of this repository. A subdirectory called data has
 
 #### How to run
 
-1. Get into the Admin Nodes (each one, if you want to not miss things) and enable NFS or SMB read-only shares of audit logs (see the StorageGRID documentation
+1. Get into the Admin Nodes (each one, if you want to not lose logs, so you want to be able to fetch them from either server) and enable NFS or SMB read-only shares of audit logs (see the StorageGRID documentation, such as [Configuring the audit client for NFS](http://docs.netapp.com/sgws-114/index.jsp?topic=%2Fcom.netapp.doc.sg-admin%2FGUID-B9B9FB7B-76FA-4C85-99A7-4310E3F24F1C.html))
 2. Fetch StorageGRID log file from Admin Node (container) (NFSv3: `sg-adm1:/var/local/audit/export`; SMB: `\\sg-adm1\...`)
 3. Fetch the log(s) (decompress if you've downloaded .tar.gz; you should always download compressed audit log files because they don't change)
 4. Run the Python script to convert the uncompressed log file(s) to a CSV file(s)
@@ -237,7 +256,8 @@ Syntax:
 
 ##### Complete Audit Log File (Full Mode)
 
-- Only this option is meant to be used with the R script
+- The output of this script can be used with the R script
+- Only this option is meant to be used with the Python script. Output and debug file must be new (not existing) files.
 
 ```shell
 python3 ./sg_audit_csv_converter.py audit.log out-file.csv debug.txt
@@ -245,13 +265,13 @@ python3 ./sg_audit_csv_converter.py audit.log out-file.csv debug.txt
 
 ##### Partial Audit Log File (Showback Mode)
 
-- Does not have data required for the R script
+- Does not have the data required for the R script
 - If you want one of the following, this mode is for you:
   - Cut down on the file size and processing requirements (resources, time, disk space)
   - Somewhat (but not completely) limit the amount of possibly private or confidential data included in these reports (feel free to hack away)
   - Want to create simple show-back or charge-back reports
 - Add `--data showback` to only include `ATYP` events `ORLM`, `SDEL`, `SGET`, `SHEA`, `SPUT`
-- In showback mode only `Timestamp`, `AMID`, `ATYP`, `CNID`, `CSIZ`, `PATH`, `RSLT`, `RULE`, `SACC`, `SAIP`, `SBAC`, `SBAI`, `STAT`, `SUSR`, `TIME`, `TLIP` will be included. Notice how S3KY and S3BK (see the S3 PUT example above) are not included. That is on purpose (security and privacy) but obviously can be changed. `PATH` still contains some info that should probably be omitted when it's unnecessary for analytics purposes
+- In showback mode only `Timestamp`, `AMID`, `ATYP`, `CNID`, `CSIZ`, `PATH`, `RSLT`, `RULE`, `SACC`, `SAIP`, `SBAC`, `SBAI`, `STAT`, `SUSR`, `TIME`, `TLIP` will be included. Notice how `S3KY` and `S3BK` (see the S3 PUT example above) are not included. That is on purpose (security and privacy), but obviously can be changed by you. `PATH` still contains some info that should probably be omitted when it's unnecessary for analytics purposes
 - Only you know what fields are relevant and how much information should be added or removed to these reports
 
 Run sg_audit_csv_converter.py from the data subdirectory against a decompressed audit log file in /sglogs. Save CSV output to sean-out.txt, debug info in debug.txt, and include a subset of rows and columns with `--data showback`:
@@ -294,10 +314,11 @@ Slice it and dice that CSV file any way you see fit. Several simple examples:
 
 - Pyton converter script:
   - **IMPORTANT**: the script does not capture all audit messages
+    - Except MTME in SDEL, SPUT, WDEL, WPUT, other [new codes in StorageGRID 11.5](https://docs.netapp.com/sgws-115/index.jsp?topic=%2Fcom.netapp.doc.sg-upgrade%2FGUID-32E18269-7337-471B-8CD1-CDDFB6E6603C.html) are not included (except MTME); this means all S3 Object Lock-related codes for SPUT (LKEN, LKLH, LKMD, LKRU), and CSIZ (Previous Object Size) in OVWR (Object Overwrite) may result in errors and require you to add them to the script
     - `MRSP` is one such entry. It contains a non-trivial JSON file which the script currently partially drops. You can easily find such rows with `cat audit.log | grep MRSP` and process them manually. Or better yet, fix the code and submit a pull request. It does not seem that partial or missing MRSP fields could impact showback analytics, but they could impact compliance analytics
-  - While the Python script can output some debug info, it's not meant for reg-exp debugging - it's meant to catch failed KV pairs and usually tends to be empty (tested with an audit log from v11.4) because we drop `MRSP` (see above) values we cannot parse before that happens
+  - While the Python script can output some debug info, it's not meant for reg-exp debugging - it's meant to catch failed KV pairs and usually tends to be empty (tested with an audit log from v11.5) because we drop `MRSP` (see above) values we cannot parse before that happens
     - How to check: compare the number of lines in audit.log with your output file. If output file has 10 lines less, that likely means 10 lines were dropped (e.g. maybe they contained `MRSP`)
-  - Not all fileds have "logical" values. Audit log may contain  `SGET` rows but with no `CSIZ` value, for example. [SGAC(CSV)] doesn't attempt to do anything about that
+  - Not all fields have "logical" values. Audit log may contain  `SGET` rows but with no `CSIZ` value, for example. [SGAC(CSV)] doesn't attempt to do anything about that
 
 - R script:
   - Could work only with CSV generated in full mode, but has not been tested with updated Python script. If it doesn't work you can try an earlier version with input CSV generated by an older version of the Python script
@@ -308,7 +329,7 @@ If you discover new keys (which is obvious from warnings or errors generated by 
 #### Performance
 
 - No meaningful testing or optimization has been done
-- Based on a casual test with a 20 MB (decompressed size) log file, the Python script running on a notebook can process the log at 10 MB/s (35 GB/day). This can be paralellized by splitting decompressed files or running several scripts against different time segments in the same file
+- Based on a casual test with a 20 MB (decompressed size) log file, the Python script running on a notebook can process the log at 10 MB/s (35 GB/day). This can be paralellized by splitting decompressed log files or running several scripts against different time segments in the same file
 - Performance comparison among these three tools is meaningless (they do different things) but since you must know, here's how they compare running against a 18 MB audit.log file:
 
 | [SGAC(CSV)] | audit-explain  | audit-sum |
@@ -316,6 +337,10 @@ If you discover new keys (which is obvious from warnings or errors generated by 
 |   2s      |   0.7s    |  0.2s     |
 
 #### Change Log
+
+- 2021/06/24
+  - Add details about management and access logs
+  - Add one code (MTME) to the Python script
 
 - 2020/11/03
   - Add SQL queries to illustrate reports that can be obtained from `showback`-mode CSV
