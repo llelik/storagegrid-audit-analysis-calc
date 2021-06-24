@@ -202,11 +202,11 @@ StorageGRID also has advanced auditing (Configuration > Audit) and protocol head
 
 Those are tricky in the sense that JSON is weirdly encoded, so it's not trivial to put it back together and present as JSON. Check the documentation on those and give it a try. Here are some examples and tips:
 
-- [SBAC(CSTR):"solidfire"][S3BK(CSTR):"local"][S3SR(CSTR):"policy"][SRCF(CSTR):"<messy JSON>"]: the value of SRCF has the new ILM rule for the account "solidfire" and bucket "local"
-- [MUUN(CSTR):"urn:sgws:identity::19663253853227287812:root"][MRSC(UI32):201][RSLT(FC32):SUCS][MRSP(CSTR):"<messy JSON>"]: the root user uploaded a new bucket policy, got the response 201 (result: success), and the response was the JSON string in MRSP
-- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-policies"][MRSP(CSTR):"<messy JSON>"] - ILM policy posted
-- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-rules"][MRSP(CSTR):"<messy JSON>"] - ILM rule applied
-- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-evaluate"][MRSP(CSTR):"<messy JSON>"] - ILM rule evaluated
+- [SBAC(CSTR):"solidfire"][S3BK(CSTR):"local"][S3SR(CSTR):"policy"][SRCF(CSTR):"messy JSON"]: the value of SRCF has the new ILM rule for the account "solidfire" and bucket "local"
+- [MUUN(CSTR):"urn:sgws:identity::19663253853227287812:root"][MRSC(UI32):201][RSLT(FC32):SUCS][MRSP(CSTR):"messy JSON"]: the root user uploaded a new bucket policy, got the response 201 (result: success), and the response was the JSON string in MRSP
+- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-policies"][MRSP(CSTR):"messy JSON"] - ILM policy posted
+- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-rules"][MRSP(CSTR):"messy JSON"] - ILM rule applied
+- [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-evaluate"][MRSP(CSTR):"messy JSON"] - ILM rule evaluated
 - [MRMD(CSTR):"POST"][MPAT(CSTR):"/api/v3/grid/ilm-rules/filters-validation"] - ILM filter validated; no JSON in this message
 - IDEL - ILM-initiated deletion of an object
 - ORLM - logged when an object is copied and stored (not deleted) thanks to ILM rules
