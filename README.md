@@ -212,7 +212,7 @@ Those are tricky in the sense that JSON is weirdly encoded, so it's not trivial 
 - ORLM - logged when an object is copied and stored (not deleted) thanks to ILM rules
 - MGAU - management audit message (requests to the StorageGRID Management API) for every request that's not a GET or HEAD.
 
-Management audit messages are numerous. This page in the StorageGRID manual](https://docs.netapp.com/sgws-115/topic/com.netapp.doc.sg-audit/GUID-21B7D957-959B-49EB-91A6-929985DBF581.html) contains a list of all management actions and codes.
+Management audit messages are numerous. This page in the [StorageGRID online manual](https://docs.netapp.com/sgws-115/topic/com.netapp.doc.sg-audit/GUID-21B7D957-959B-49EB-91A6-929985DBF581.html) contains a list of all management actions and codes.
 
 To get examples of JSON output you may see encoded, refer to [Bucket and group access policies](https://docs.netapp.com/sgws-115/topic/com.netapp.doc.sg-s3/GUID-53596498-9334-44DB-A4CE-DFEC28CF21FF.html).
 
