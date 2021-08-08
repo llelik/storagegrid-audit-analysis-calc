@@ -23,6 +23,8 @@
 
 ## Run `sgac.py` and view its output
 
+Download StorageGRID 11 (up to 11.5) audit log and convert it to JSON like so:
+
 ```shell
 ./sgac.py /data/in/audit.log /data/out/sgac.json
 ```
@@ -300,9 +302,9 @@ audit-sum is also built into StorageGRID. This is partial output of audit-sum ex
 
 ## Known issues
 
-I know of no major issues, but check open issues to see if there's anything noteworthy:
+I know of no major issues, but check open issues to see if there's anything noteworthy.
 
-It is recommended to retain audit logs (for example, you could upload them to a WORM bucket) and, if you use them for something important, randomly sample data and make sure JSON output corresponds to audit log file values.
+It is recommended to retain audit logs (for example, upload them to a WORM bucket) and, if you use them for something important, randomly sample JSON data and make sure JSON output corresponds to the original audit log file values.
 
 ## Change Log
 
@@ -328,3 +330,4 @@ It is recommended to retain audit logs (for example, you could upload them to a 
   - Silently drop MRSP key-value pairs because the script cannot handle them
   - Add debug_file argument for issues (except MRSP) with log parsing
   - Minor changes to the script
+
