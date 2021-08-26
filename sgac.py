@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 #################################################################################
-#  [SGAC] - Python and R scripts for NetApp StorageGRID Audit-log Converter     #
+#  [SGAC] - NetApp StorageGRID Audit-log Converter to JSON                      #
 #  License: The MIT License                                                     #
 #  Date: 2021/08/08                                                             #
 #  Authors: scaleoutSean                                                        #

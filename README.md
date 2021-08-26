@@ -308,7 +308,7 @@ It is recommended to retain audit logs (for example, upload them to a WORM bucke
 
 ## Change Log
 
-- 2021/08/08
+- v0.1 (2021/08/08)
   - Now converts to JSON
   - Options and "modes" removed
   - Seems to successfully convert all lines to JSON (tested with 350K lines of audit logs from StorageGIRD v11.5, including Object Lock logs)
