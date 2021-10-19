@@ -123,6 +123,10 @@ SGAC saved audit log data to `/data/out/sgac.json`. View the file (formatted ver
 
 You may import it somewhere for the purpose of analytics, visualization and reporting.
 
+Example: screenshot of Logstash processing SGAC JSON output and sending it to Elastic:
+
+![SGAC JSON output imported with Logstash](sgac-to-json-to-logstash.png)
+
 ### SGAC performance
 
 No tuning has been done whatsoever, because it hasn't been necessary.
@@ -302,7 +306,17 @@ audit-sum is also built into StorageGRID. This is partial output of audit-sum ex
 
 ## Known issues
 
-I know of no major issues, but check open issues to see if there's anything noteworthy.
+While importing SGAC JSON into Elastic via Logstash, you may (if you have entries that trigger it) see the following warning:
+
+```raw
+"status"=>400, "error"=>{"type"=>"mapper_parsing_exception", "reason"=>"failed to parse field [SBAI] of type [long] in document with id 'gMQImHwBTwioOum43fRL'. Preview of field's value: '56367554550348432565'", "caused_by"=>{"type"=>"input_coercion_exception", "reason"=>"Numeric value (56367554550348432565) out of range of long (-9223372036854775808 - 9223372036854775807)\n at [Source: (ByteArrayInputStream); line: 1, column: 2183]"
+```
+
+These documents (lines) will be dropped. 
+
+You could change the script to convert SBAI to text. It seems [ignore_malformed](https://www.elastic.co/guide/en/elasticsearch/reference/current/ignore-malformed.html) wouldn't work here.
+
+I know of no other major issues, but check open issues to see if there's anything noteworthy.
 
 It is recommended to retain audit logs (for example, upload them to a WORM bucket) and, if you use them for something important, randomly sample JSON data and make sure JSON output corresponds to the original audit log file values.
 
