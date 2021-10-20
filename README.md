@@ -312,6 +312,9 @@ It is recommended to retain audit logs (for example, upload them to a WORM bucke
 
 ## Change Log
 
+- v0.2.1 (2021/10/20)
+  - Force-convert ATID value to string
+
 - v0.2 (2021/10/20)
   - Force-convert S3AI and SBAI values to string
 

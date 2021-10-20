@@ -3,7 +3,7 @@
 #################################################################################
 #  [SGAC] - NetApp StorageGRID Audit-log Converter to JSON                      #
 #  License: The MIT License                                                     #
-#  Date: 2021/10/20                                                             #
+#  Date: 2021/10/20 (v0.2.1)                                                    #
 #  Authors: scaleoutSean                                                        #
 #  URL: https://github.com/scaleoutsean/storagegrid-audit-analysis              #
 #################################################################################
@@ -66,6 +66,9 @@ def _decode(o):
         return o
 
 def fix_line(line):
+    if 'ATID' in line:
+        if type(line['ATID']) == int:
+            line['ATID'] = str(line['ATID'])
     if 'S3AI' in line:
         if type(line['S3AI']) == int:
             line['S3AI'] = str(line['S3AI'])
