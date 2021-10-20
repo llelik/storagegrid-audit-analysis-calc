@@ -3,7 +3,7 @@
 #################################################################################
 #  [SGAC] - NetApp StorageGRID Audit-log Converter to JSON                      #
 #  License: The MIT License                                                     #
-#  Date: 2021/08/08                                                             #
+#  Date: 2021/10/20                                                             #
 #  Authors: scaleoutSean                                                        #
 #  URL: https://github.com/scaleoutsean/storagegrid-audit-analysis              #
 #################################################################################
@@ -65,6 +65,14 @@ def _decode(o):
     else:
         return o
 
+def fix_line(line):
+    if 'S3AI' in line:
+        if type(line['S3AI']) == int:
+            line['S3AI'] = str(line['S3AI'])
+    if 'SBAI' in line:
+        if type(line['SBAI']) == int:
+            line['SBAI'] = str(line['SBAI'])
+    return line
 
 parser = argparse.ArgumentParser(description="Convert NetApp StorageGRID audit log file to JSON")
 parser.add_argument("source_file", help="Source (audit log) file", type = str)
@@ -75,8 +83,9 @@ row_number = 0
 with open(args.destination_file, 'w') as json_file:
     with open(args.source_file, "r") as f:
         for l in f:
-            row_number = row_number + 1
-            sgac_json = process_line(l, row_number)
-            json.dump(sgac_json, json_file)
+            row_number    = row_number + 1
+            sgac_json     = process_line(l, row_number)
+            sgac_json_fix = fix_line(sgac_json)
+            json.dump(sgac_json_fix, json_file)
             json_file.write('\n')
         print("Number of lines parsed from file", args.source_file, ":", row_number)

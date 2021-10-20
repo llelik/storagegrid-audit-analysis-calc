@@ -306,21 +306,14 @@ audit-sum is also built into StorageGRID. This is partial output of audit-sum ex
 
 ## Known issues
 
-While importing SGAC JSON into Elastic via Logstash, you may (if you have entries that trigger it) see the following warning:
-
-```raw
-"status"=>400, "error"=>{"type"=>"mapper_parsing_exception", "reason"=>"failed to parse field [SBAI] of type [long] in document with id 'gMQImHwBTwioOum43fRL'. Preview of field's value: '56367554550348432565'", "caused_by"=>{"type"=>"input_coercion_exception", "reason"=>"Numeric value (56367554550348432565) out of range of long (-9223372036854775808 - 9223372036854775807)\n at [Source: (ByteArrayInputStream); line: 1, column: 2183]"
-```
-
-These documents (lines) will be dropped. 
-
-You could change the script to convert SBAI to text. It seems [ignore_malformed](https://www.elastic.co/guide/en/elasticsearch/reference/current/ignore-malformed.html) wouldn't work here.
-
-I know of no other major issues, but check open issues to see if there's anything noteworthy.
+Check open issues to see if there's anything noteworthy.
 
 It is recommended to retain audit logs (for example, upload them to a WORM bucket) and, if you use them for something important, randomly sample JSON data and make sure JSON output corresponds to the original audit log file values.
 
 ## Change Log
+
+- v0.2 (2021/10/20)
+  - Force-convert S3AI and SBAI values to string
 
 - v0.1 (2021/08/08)
   - Now converts to JSON
