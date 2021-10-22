@@ -39,11 +39,11 @@ SGAC saved audit log data to `/data/out/sgac.json`. View the file (formatted ver
   "TIME": 11138,
   "SAIP": "10.128.59.192",
   "TLIP": "10.128.59.241",
-  "S3AI": 19663253853227287000,
+  "S3AI": "19663253853227287000",
   "SACC": "solidfire",
   "S3AK": "SGKHulDF8HGK7Az_xR02pVQgooThBQ_rE9dmuuLsLg==",
   "SUSR": "urn:sgws:identity::19663253853227287812:root",
-  "SBAI": 19663253853227287000,
+  "SBAI": "19663253853227287000",
   "SBAC": "solidfire",
   "S3BK": "local",
   "S3SR": "policy",
@@ -53,7 +53,7 @@ SGAC saved audit log data to `/data/out/sgac.json`. View the file (formatted ver
   "ATYP": "SPUT",
   "ANID": 12470893,
   "AMID": "S3RQ",
-  "ATID": 17576182984180280000
+  "ATID": "17576182984180280000"
 }
 {
   "Timestamp": "2021-06-23T04:28:00.173006",
@@ -62,11 +62,11 @@ SGAC saved audit log data to `/data/out/sgac.json`. View the file (formatted ver
   "TIME": 2529,
   "SAIP": "10.128.59.192",
   "TLIP": "10.128.59.241",
-  "S3AI": 19663253853227287000,
+  "S3AI": "19663253853227287000",
   "SACC": "solidfire",
   "S3AK": "SGKHulDF8HGK7Az_xR02pVQgooThBQ_rE9dmuuLsLg==",
   "SUSR": "urn:sgws:identity::19663253853227287812:root",
-  "SBAI": 19663253853227287000,
+  "SBAI": "19663253853227287000",
   "SBAC": "solidfire",
   "S3BK": "local",
   "S3SR": "policy",
@@ -75,7 +75,7 @@ SGAC saved audit log data to `/data/out/sgac.json`. View the file (formatted ver
   "ATYP": "SGET",
   "ANID": 12470893,
   "AMID": "S3RQ",
-  "ATID": 7642530268470403000
+  "ATID": "7642530268470403000"
 }
 {
   "Timestamp": "2021-06-23T04:28:37.598880",
@@ -95,7 +95,7 @@ SGAC saved audit log data to `/data/out/sgac.json`. View the file (formatted ver
   "ATYP": "MGAU",
   "ANID": 12965561,
   "AMID": "GMGT",
-  "ATID": 10845975050772195000
+  "ATID": "10845975050772195000"
 }
 {
   "Timestamp": "2021-06-23T04:29:26.581992",
@@ -115,7 +115,7 @@ SGAC saved audit log data to `/data/out/sgac.json`. View the file (formatted ver
   "ATYP": "MGAU",
   "ANID": 12965561,
   "AMID": "GMGT",
-  "ATID": 17919283269131872000
+  "ATID": "17919283269131872000"
 }
 ```
 
