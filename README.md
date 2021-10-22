@@ -127,7 +127,7 @@ Example: screenshot of Logstash processing SGAC JSON output and sending it to El
 
 ![SGAC JSON output imported with Logstash](sgac-to-json-to-logstash.png)
 
-Example: finding successful downloads of an object by an IP:
+Example: finding successful downloads of an object from a specific IP address:
 
 ![Successful download of an object by a client](elastic-kibana-example.png)
 
