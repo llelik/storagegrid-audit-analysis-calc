@@ -32,6 +32,7 @@ def process_line(line,row_number):
         if e1 == "SRCF" or e1 == "MRBD" or e1 == "MRSP" or e1 == "SRCF":
             e2 = re.sub(r'\\n', r'', e2)
             e2 = re.sub(r'\\x09', r'', e2)
+            e2 = re.sub(r'\\', r'', e2)
         edict[e1] = e2
     json_data = json.dumps(edict)
     if validate_json(json_data) == True:
@@ -65,6 +66,7 @@ def _decode(o):
     else:
         return o
 
+
 def fix_line(line):
     if 'ATID' in line:
         if type(line['ATID']) == int:
@@ -76,6 +78,7 @@ def fix_line(line):
         if type(line['SBAI']) == int:
             line['SBAI'] = str(line['SBAI'])
     return line
+
 
 parser = argparse.ArgumentParser(description="Convert NetApp StorageGRID audit log file to JSON")
 parser.add_argument("source_file", help="Source (audit log) file", type = str)
