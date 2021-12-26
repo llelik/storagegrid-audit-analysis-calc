@@ -165,9 +165,9 @@ Audit log files older than one day are compressed (see the documentation links a
 audit.log
 ```
 
-It isn't practical to "stream" logs from audit.log because that file can be large and you'd have to re-read it all the time (definitively not recommended for Primary Admin node!).
+It isn't practical to "stream" logs from audit.log because that file can be large and you'd have to re-read it all the time (not recommended for Primary Admin node because of the potential to overload it).
 
-It's recommended to copy compressed files from NFS shares and decompress and process them elsewhere.
+It is recommended to copy compressed files from NFS shares and decompress and process them elsewhere.
 
 ### Sample StorageGRID audit log entry for S3 PUT
 
@@ -251,7 +251,7 @@ See the official documentation. I'm not aware of any omissions.
 
 - Admin Node requires [200 GB space for audit logs](https://docs.netapp.com/sgws-115/index.jsp?topic=%2Fcom.netapp.doc.sg-install-rhel%2FGUID-8A777F78-E21D-4E4F-AF1A-DBD432E6D030.html)
 - Every day logs are [rotated and compressed](https://docs.netapp.com/sgws-115/index.jsp?topic=%2Fcom.netapp.doc.sg-audit%2FGUID-33B77138-D408-4D4F-9994-D2E8C3101FF2.html), so assuming 20 GB of log files per day, one has days to get the compressed log file out before it's deleted. The NetApp Support site has a KB about expanding the space for logs.
-- You could use NetApp XCP to copy files to another share or CloudSync to copy them from NFS to S3 (yes, you *can* copy audit logs to StorageGRID, but that kind of defeats the purpose for certain things)
+- You could use NetApp XCP to copy files to another share or CloudSync to copy them from NFS to S3 (yes, you *can* copy audit logs to a StorageGRID bucket, but that kind of defeats the purpose for certain things such as compliance)
 
 ### Sample audit-explain output
 
@@ -315,6 +315,9 @@ Check open issues to see if there's anything noteworthy.
 It is recommended to retain audit logs (for example, upload them to a WORM bucket) and, if you use them for something important, randomly sample JSON data and make sure JSON output corresponds to the original audit log file values.
 
 ## Change Log
+
+- v0.2.2 (2021/12/26)
+  - Strip existing JSON escapes from nested JSON in audit log before converting log to JSON in SGAC
 
 - v0.2.1 (2021/10/20)
   - Force-convert ATID value to string
