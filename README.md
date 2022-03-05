@@ -23,7 +23,9 @@
 
 ## Run `sgac.py` and view its output
 
-Download StorageGRID 11 (up to 11.5) audit log and convert it to JSON like so:
+**NOTE:** users of StorageGRID 11.6 and above should check [audit log forwarding](https://scaleoutsean.github.io/2022/03/04/storagegrid-s3-select.html#storagegrid-log-forwarding) feature that appeared in 11.6. That link also explains why there's no SGAC for version 11.6.
+
+Download StorageGRID 11 (11.0 to 11.5) audit log and convert it to JSON like so:
 
 ```shell
 ./sgac.py /data/in/audit.log /data/out/sgac.json
@@ -165,7 +167,7 @@ Audit log files older than one day are compressed (see the documentation links a
 audit.log
 ```
 
-It isn't practical to "stream" logs from audit.log because that file can be large and you'd have to re-read it all the time (not recommended for Primary Admin node because of the potential to overload it).
+It isn't practical to "stream" logs from audit.log because that file can be large and you'd probably re-read it all the time (not recommended for Primary Admin node because of the potential to overload it).
 
 It is recommended to copy compressed files from NFS shares and decompress and process them elsewhere.
 
