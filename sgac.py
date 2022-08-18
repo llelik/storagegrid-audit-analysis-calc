@@ -3,7 +3,7 @@
 #################################################################################
 #  [SGAC] - NetApp StorageGRID Audit-log Converter to JSON                      #
 #  License: The MIT License                                                     #
-#  Date: 2021/10/20 (v0.2.1)                                                    #
+#  Date: 2021/10/20 (v0.2.2)                                                    #
 #  Authors: scaleoutSean                                                        #
 #  URL: https://github.com/scaleoutsean/storagegrid-audit-analysis              #
 #################################################################################

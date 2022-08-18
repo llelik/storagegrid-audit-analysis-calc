@@ -23,9 +23,9 @@
 
 ## Run `sgac.py` and view its output
 
-**NOTE:** users of StorageGRID 11.6 and above should check [audit log forwarding](https://scaleoutsean.github.io/2022/03/04/storagegrid-s3-select.html#storagegrid-log-forwarding) feature that appeared in 11.6. That link also explains why there's no SGAC for version 11.6.
+**NOTE:** users of StorageGRID 11.6 and above should check [audit log forwarding](https://scaleoutsean.github.io/2022/03/04/storagegrid-s3-select.html#storagegrid-log-forwarding) feature that appeared in 11.6. That link also explains why there's no SGAC for version 11.6 - you don't need to read and process logs - since 11.6 they can be [forwarded](https://docs.netapp.com/us-en/storagegrid-enable/tools-apps-guides/elk-instructions.html#instruction) to a syslog destination external to StorageGRID cluster.
 
-Download StorageGRID 11 (11.0 to 11.5) audit log and convert it to JSON like so:
+Users of StorageGRID 11 (especially 11.0 to 11.5) can download StorageGRID 11 audit log file and convert it to JSON documents (one per event) like so:
 
 ```shell
 ./sgac.py /data/in/audit.log /data/out/sgac.json
