@@ -81,12 +81,15 @@ def fix_line(line):
 
 
 parser = argparse.ArgumentParser(description="Convert NetApp StorageGRID audit log file to JSON")
-parser.add_argument("source_file", help="Source (audit log) file", type = str)
-parser.add_argument("destination_file", help="Destination file (JSON)", type = str)
+parser.add_argument("--source_file", "-s", "-src", "--source", required=True, help="Source (audit log) file", type = str)
+parser.add_argument("--destination_file", "-d", "-dst", "--destination", required=True, help="Destination file (JSON)", type = str)
+parser.add_argument("--max_fsize", required=True, help="Bottom file size limit", type = int)
+parser.add_argument("--report_file", "-r", help="Calculation report destination file", type = str)
 args = parser.parse_args()
 
 row_number = 0
 stats_dict = {}
+print(args.max_fsize)
 with open(args.destination_file, 'w') as json_file:
     with open(args.source_file, "r") as f:
         for l in f:
@@ -96,7 +99,7 @@ with open(args.destination_file, 'w') as json_file:
             # my code begin
             
             try:
-                if sgac_json['ATYP'] == 'SPUT':
+                if sgac_json['ATYP'] == 'SPUT' and sgac_json['CSIZ'] < args.max_fsize:
                    try:
                       Cnt_curr = stats_dict[sgac_json['SBAC']]['Cnt']
                       Size_curr = stats_dict[sgac_json['SBAC']]['Size']
@@ -116,6 +119,11 @@ with open(args.destination_file, 'w') as json_file:
             json.dump(sgac_json_fix, json_file)
             json_file.write('\n')
         print("Number of lines parsed from file", args.source_file, ":", row_number)
+
+with open(args.report_file, 'w') as rep_file:
+    json.dump(stats_dict, rep_file)
+    rep_file.write('\n')
+
 
 print('Statistics: ', '\n')
 print(stats_dict)
