@@ -86,12 +86,36 @@ parser.add_argument("destination_file", help="Destination file (JSON)", type = s
 args = parser.parse_args()
 
 row_number = 0
+stats_dict = {}
 with open(args.destination_file, 'w') as json_file:
     with open(args.source_file, "r") as f:
         for l in f:
             row_number    = row_number + 1
             sgac_json     = process_line(l, row_number)
             sgac_json_fix = fix_line(sgac_json)
+            # my code begin
+            
+            try:
+                if sgac_json['ATYP'] == 'SPUT':
+                   try:
+                      Cnt_curr = stats_dict[sgac_json['SBAC']]['Cnt']
+                      Size_curr = stats_dict[sgac_json['SBAC']]['Size']
+                      stats_dict[sgac_json['SBAC']] = {'Cnt': Cnt_curr + 1, 'Size': Size_curr + sgac_json['CSIZ']} 
+                   except:
+                      print('Adding new Acc: ', sgac_json['SBAC'])
+                      stats_dict[sgac_json['SBAC']] = { 'Cnt': 0, 'Size': 0}
+                      Cnt_curr = stats_dict[sgac_json['SBAC']]['Cnt']
+                      Size_curr = stats_dict[sgac_json['SBAC']]['Size']
+                      stats_dict[sgac_json['SBAC']] = {'Cnt': Cnt_curr + 1, 'Size': Size_curr + sgac_json['CSIZ']}
+
+            except:
+                print('Excluded oper type: ', sgac_json['ATYP'])
+            if sgac_json['ATYP'] == 'OVWR':
+                print('Overwrite = ', sgac_json['PATH'] )
+            # my code end    
             json.dump(sgac_json_fix, json_file)
             json_file.write('\n')
         print("Number of lines parsed from file", args.source_file, ":", row_number)
+
+print('Statistics: ', '\n')
+print(stats_dict)
